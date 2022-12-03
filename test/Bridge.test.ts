@@ -16,14 +16,14 @@ import {
   signSwapData,
   signUpdateOracleData,
 } from "./utils/utils";
-import type { Bridge, Token } from "../typechain-types";
+import type { Bridge, TestToken } from "../typechain-types";
 
 const web3 = new Web3();
 
 describe("Bridge contract", () => {
   let owner: SignerWithAddress;
   let bridge: Bridge;
-  let token: Token;
+  let token: TestToken;
 
   const signer: Account = web3.eth.accounts.create() as unknown as Account;
   const user: Account = web3.eth.accounts.create() as unknown as Account;
@@ -52,8 +52,8 @@ describe("Bridge contract", () => {
     bridge = await Bridge.deploy(oracleSetAddresses) as Bridge;
     await bridge.deployed();
 
-    const Token = await ethers.getContractFactory("Token");
-    token = await Token.deploy() as Token;
+    const TestToken = await ethers.getContractFactory("TestToken");
+    token = await TestToken.deploy() as TestToken;
     await token.deployed();
 
     const ownerBalance = await token.balanceOf(owner.address);

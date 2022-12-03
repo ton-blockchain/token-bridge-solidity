@@ -15,7 +15,7 @@ async function main() {
     "0x896B65f1f1078104F0d0d4723bc371bCF173B60F"
   );
   const token = await ethers.getContractAt(
-    "Token",
+    "TestToken",
     "0x6cB26573dacd1994BADfDa4CBcC7553AcafFf8d6"
   );
 

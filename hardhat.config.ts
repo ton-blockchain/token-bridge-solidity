@@ -38,26 +38,13 @@ const config: HardhatUserConfig = {
         count: 100,
       },
     },
-    rinkeby: {
-      url: process.env.RINKEBY || "",
-      accounts:
-        [process.env.PRIVATE_KEY || ''],
-    },
     goerli: {
-      url: process.env.GOERLI || "",
+      url: process.env.GOERLI_ENDPOINT || "",
       accounts:
         [process.env.PRIVATE_KEY || ''],
     },
-    testnet_bnb: {
-      url: process.env.TESTNET_BNB || "",
-      accounts: [process.env.PRIVATE_KEY || ''],
-    },
-    testnet_csc: {
-      url: process.env.TESTNET_CSC || '',
-      accounts: [process.env.PRIVATE_KEY || '']
-    },
-    testnet_avax: {
-      url: process.env.TESTNET_AVAX || '',
+    bsc_testnet: {
+      url: process.env.BSC_TESTNET_ENDPOINT || "",
       accounts: [process.env.PRIVATE_KEY || '']
     },
     local: {
