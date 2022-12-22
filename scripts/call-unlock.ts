@@ -1,6 +1,6 @@
 import TonWeb from "tonweb";
 import { ethers } from "hardhat";
-import { Signature, SwapData, TonAddress } from "./types/TonTypes";
+import { Signature, SwapData } from "./types/TonTypes";
 
 const decToHex = (dec: string): string =>
   "0x" + new TonWeb.utils.BN(dec).toString(16);
@@ -37,7 +37,7 @@ export let prepareSwapData = (
   receiver: string,
   token: string,
   amount: string,
-  address_: TonAddress,
+  address_hash: string,
   tx_hash: any,
   lt: any
 ) => {
@@ -49,7 +49,7 @@ export let prepareSwapData = (
     token,
     amount,
     tx: {
-      address_,
+      address_hash,
       tx_hash,
       lt,
     },
@@ -81,11 +81,7 @@ export let prepareSwapData = (
   const reciever = "0xa846bc19e8ab8bb0e0bf386853d8c5e199f0af9b";
   const token = "0xc954f9239950ef7d278c91e9fb8416469d7c104f";
   const amount = "1000000000000000000";
-  const tonAddress = {
-    workchain: 0,
-    address_hash:
-      "0x8ebd203c0030e59d5f1bca8006cbb0c73a7627d047b6d5fb3322124f96a36c8e",
-  };
+  const ton_address_hash = "0x8ebd203c0030e59d5f1bca8006cbb0c73a7627d047b6d5fb3322124f96a36c8e";
   const tx_hash =
     "0x6375001987b4813d0284a2d42580c98557bc6d3085977dbc0b5f278e957404ba";
   const lt = "3444241000001";
@@ -94,7 +90,7 @@ export let prepareSwapData = (
     reciever,
     token,
     amount,
-    tonAddress,
+    ton_address_hash,
     tx_hash,
     lt
   );

@@ -1,6 +1,7 @@
-export type TonAddress = {
-  workchain: number;
+export type TonTxId = {
   address_hash: string;
+  tx_hash: string;
+  lt: number;
 };
 
 export type SwapData = {
@@ -8,12 +9,6 @@ export type SwapData = {
   token: string;
   amount: string;
   tx: TonTxId;
-};
-
-export type TonTxId = {
-  address_: TonAddress;
-  tx_hash: string;
-  lt: number;
 };
 
 export type Signature = {

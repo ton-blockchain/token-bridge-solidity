@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0
 pragma solidity ^0.8.9;
 pragma experimental ABIEncoderV2;
 
@@ -5,9 +6,7 @@ import "./TonUtils.sol";
 
 contract SignatureChecker is TonUtils {
     function checkSignature(bytes32 digest, Signature memory sig) public pure {
-        if (sig.signature.length != 65) {
-            revert("ECDSA: invalid signature length");
-        }
+        require(sig.signature.length == 65, "ECDSA: invalid signature length");
         // Divide the signature in r, s and v variables
         bytes32 r;
         bytes32 s;
@@ -24,16 +23,13 @@ contract SignatureChecker is TonUtils {
             v := byte(0, mload(add(signature, 0x60)))
         }
 
-        if (
-            uint256(s) >
-            0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0
-        ) {
-            revert("ECDSA: invalid signature 's' value");
-        }
+        require(
+            uint256(s) <= 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0,
+            "ECDSA: invalid signature 's' value"
+        );
 
-        if (v != 27 && v != 28) {
-            revert("ECDSA: invalid signature 'v' value");
-        }
+        require(v == 27 || v == 28, "ECDSA: invalid signature 'v' value");
+
         bytes memory prefix = "\x19Ethereum Signed Message:\n32";
         bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, digest));
         require(
@@ -42,7 +38,7 @@ contract SignatureChecker is TonUtils {
         );
     }
 
-    function getBurnDataId(SwapData memory data)
+    function getSwapDataId(SwapData memory data)
         public
         view
         returns (bytes32 result)
@@ -51,11 +47,11 @@ contract SignatureChecker is TonUtils {
             abi.encode(
                 0xDA7A,
                 address(this),
+                block.chainid,
                 data.receiver,
                 data.token,
                 data.amount,
-                data.tx.address_.workchain,
-                data.tx.address_.address_hash,
+                data.tx.address_hash,
                 data.tx.tx_hash,
                 data.tx.lt
             )
@@ -68,17 +64,17 @@ contract SignatureChecker is TonUtils {
         returns (bytes32 result)
     {
         result = keccak256(
-            abi.encode(0x5e7, address(this), oracleSetHash, set)
+            abi.encode(0x5e7, address(this), block.chainid, oracleSetHash, set)
         );
     }
 
-    function getNewBurnStatusId(bool newBurnStatus, int256 nonce)
+    function getNewLockStatusId(bool newLockStatus, uint256 nonce)
         public
         view
         returns (bytes32 result)
     {
         result = keccak256(
-            abi.encode(0xB012, address(this), newBurnStatus, nonce)
+            abi.encode(0xB012, address(this), block.chainid, newLockStatus, nonce)
         );
     }
 }
