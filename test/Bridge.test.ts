@@ -106,6 +106,7 @@ describe("Bridge contract", () => {
 
       await bridge.lock(token.address, bridgeAllowance, tonAddressHash);
 
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Lock is currently disabled");
     }
@@ -120,6 +121,7 @@ describe("Bridge contract", () => {
         bridgeAllowance,
         tonAddressHash
       );
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("lock: wrong token address");
     }
@@ -134,6 +136,7 @@ describe("Bridge contract", () => {
         bridgeAllowance,
         tonAddressHash
       );
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("lock wrapped toncoin");
     }
@@ -148,6 +151,7 @@ describe("Bridge contract", () => {
         bridgeAllowance,
         tonAddressHash
       );
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("lock wrapped toncoin");
     }
@@ -159,6 +163,7 @@ describe("Bridge contract", () => {
 
     try {
       await bridge.lock(wrappedJetton.address, bridgeAllowance, tonAddressHash);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("lock wrapped jetton");
     }
@@ -177,6 +182,7 @@ describe("Bridge contract", () => {
           bridgeAllowance,
           tonAddressHash
       );
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Max totalSupply 2 ** 120 - 1");
     }
@@ -195,6 +201,7 @@ describe("Bridge contract", () => {
           bridgeAllowance,
           tonAddressHash
       );
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Max totalSupply 2 ** 120 - 1");
     }
@@ -232,6 +239,7 @@ describe("Bridge contract", () => {
           totalSupply,
           tonAddressHash
       );
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Max amount 2 ** 100");
     }
@@ -262,6 +270,7 @@ describe("Bridge contract", () => {
           parseUnits("0"),
           tonAddressHash
       );
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("newBalance must be greater than oldBalance");
     }
@@ -291,6 +300,7 @@ describe("Bridge contract", () => {
 
     try {
       await bridge.unlock(data, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Unauthorized signer");
     }
@@ -310,6 +320,7 @@ describe("Bridge contract", () => {
     const signatures = signSwapData(data, [signer], bridge.address);
     try {
       await bridge.unlock(data, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Not enough signatures");
     }
@@ -335,6 +346,7 @@ describe("Bridge contract", () => {
     await bridge.unlock(data, signatures);
     try {
       await bridge.unlock(data, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Vote is already finished");
     }
@@ -385,17 +397,18 @@ describe("Bridge contract", () => {
     const signatures = signSwapData(data, oracleSet, bridge.address);
 
     try {
-    await bridge.unlock(prepareSwapData(
-        owner.address,
-        token.address,
-        parseUnits('5'),
-        tonAddressHash,
-        TON_TX_HASH,
-        TON_TX_LT
-    ), signatures);
-  } catch (err: any) {
-    expect(err.toString()).to.have.string("Wrong signature");
-  }
+      await bridge.unlock(prepareSwapData(
+          owner.address,
+          token.address,
+          parseUnits('5'),
+          tonAddressHash,
+          TON_TX_HASH,
+          TON_TX_LT
+      ), signatures);
+      expect.fail()
+    } catch (err: any) {
+      expect(err.toString()).to.have.string("Wrong signature");
+    }
   });
 
   it("Should unlock token 2 ** 100", async () => {
@@ -442,6 +455,7 @@ describe("Bridge contract", () => {
 
     try {
       await bridge.voteForSwitchLock(true, 666, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Vote is already finished");
     }
@@ -457,6 +471,7 @@ describe("Bridge contract", () => {
 
     try {
       await bridge.voteForSwitchLock(true, 666, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Unauthorized signer");
     }
@@ -472,6 +487,7 @@ describe("Bridge contract", () => {
 
     try {
       await bridge.voteForSwitchLock(true, 666, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Not enough signatures");
     }
@@ -487,6 +503,7 @@ describe("Bridge contract", () => {
 
     try {
       await bridge.voteForSwitchLock(true, 555, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Wrong signature");
     }
@@ -525,6 +542,7 @@ describe("Bridge contract", () => {
 
     try {
       await bridge.voteForNewOracleSet(oracleSetHash, newOracleSet, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Vote is already finished");
     }
@@ -555,6 +573,7 @@ describe("Bridge contract", () => {
 
     try {
       await bridge.voteForNewOracleSet(oracleSetHash, oldOracles, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Wrong signature");
     }
@@ -584,7 +603,8 @@ describe("Bridge contract", () => {
     );
 
     try {
-    await bridge.voteForNewOracleSet(oracleSetHash, newOracleSet, signatures);
+      await bridge.voteForNewOracleSet(oracleSetHash, newOracleSet, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Unauthorized signer");
     }
@@ -614,7 +634,8 @@ describe("Bridge contract", () => {
     );
 
     try {
-    await bridge.voteForNewOracleSet(oracleSetHash, newOracleSet, signatures);
+      await bridge.voteForNewOracleSet(oracleSetHash, newOracleSet, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Not enough signatures");
     }
@@ -641,6 +662,7 @@ describe("Bridge contract", () => {
 
     try {
       await bridge.voteForNewOracleSet(oracleSetHash, newOracleSet, signatures);
+      expect.fail()
     } catch (error: any) {
       expect(error.toString()).to.have.string("New set is too short");
     }
@@ -670,6 +692,7 @@ describe("Bridge contract", () => {
 
     try {
       await bridge.voteForNewOracleSet(oracleSetHash, newOracleSet, signatures);
+      expect.fail()
     } catch (error: any) {
       expect(error.toString()).to.have.string("Duplicate oracle in Set");
     }
