@@ -481,7 +481,7 @@ describe("Bridge contract", () => {
     const signatures = signUpdateLockStatus(
         true,
         666,
-        oracleSet.slice(1),
+        oracleSet.slice(2),
         bridge.address
     );
 
@@ -629,7 +629,7 @@ describe("Bridge contract", () => {
     const signatures = signUpdateOracleData(
       oracleSetHash,
       newOracleSet,
-      oracleSet.slice(1),
+      oracleSet.slice(2),
       bridge.address
     );
 
