@@ -106,6 +106,7 @@ describe("Bridge contract", () => {
 
       await bridge.lock(token.address, bridgeAllowance, tonAddressHash);
 
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Lock is currently disabled");
     }
@@ -116,10 +117,11 @@ describe("Bridge contract", () => {
     await token.approve(bridge.address, bridgeAllowance);
     try {
       await bridge.lock(
-        ethers.constants.AddressZero,
-        bridgeAllowance,
-        tonAddressHash
+          ethers.constants.AddressZero,
+          bridgeAllowance,
+          tonAddressHash
       );
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("lock: wrong token address");
     }
@@ -130,10 +132,11 @@ describe("Bridge contract", () => {
     await token.approve(bridge.address, bridgeAllowance);
     try {
       await bridge.lock(
-        '0x582d872a1b094fc48f5de31d3b73f2d9be47def1',
-        bridgeAllowance,
-        tonAddressHash
+          '0x582d872a1b094fc48f5de31d3b73f2d9be47def1',
+          bridgeAllowance,
+          tonAddressHash
       );
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("lock wrapped toncoin");
     }
@@ -144,10 +147,11 @@ describe("Bridge contract", () => {
     await token.approve(bridge.address, bridgeAllowance);
     try {
       await bridge.lock(
-        '0x76A797A59Ba2C17726896976B7B3747BfD1d220f',
-        bridgeAllowance,
-        tonAddressHash
+          '0x76A797A59Ba2C17726896976B7B3747BfD1d220f',
+          bridgeAllowance,
+          tonAddressHash
       );
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("lock wrapped toncoin");
     }
@@ -159,6 +163,7 @@ describe("Bridge contract", () => {
 
     try {
       await bridge.lock(wrappedJetton.address, bridgeAllowance, tonAddressHash);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("lock wrapped jetton");
     }
@@ -177,6 +182,7 @@ describe("Bridge contract", () => {
           bridgeAllowance,
           tonAddressHash
       );
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Max totalSupply 2 ** 120 - 1");
     }
@@ -195,6 +201,7 @@ describe("Bridge contract", () => {
           bridgeAllowance,
           tonAddressHash
       );
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Max totalSupply 2 ** 120 - 1");
     }
@@ -232,6 +239,7 @@ describe("Bridge contract", () => {
           totalSupply,
           tonAddressHash
       );
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Max amount 2 ** 100");
     }
@@ -262,6 +270,7 @@ describe("Bridge contract", () => {
           parseUnits("0"),
           tonAddressHash
       );
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("newBalance must be greater than oldBalance");
     }
@@ -272,12 +281,12 @@ describe("Bridge contract", () => {
   it("Should throw 'Unauthorized signer' exception", async () => {
     const amount = parseUnits("2").toString();
     const data = prepareSwapData(
-      owner.address,
-      token.address,
-      amount,
-      tonAddressHash,
-      TON_TX_HASH,
-      TON_TX_LT
+        owner.address,
+        token.address,
+        amount,
+        tonAddressHash,
+        TON_TX_HASH,
+        TON_TX_LT
     );
 
     const oracleSetUnauthorized = [
@@ -291,6 +300,7 @@ describe("Bridge contract", () => {
 
     try {
       await bridge.unlock(data, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Unauthorized signer");
     }
@@ -299,17 +309,18 @@ describe("Bridge contract", () => {
   it("Should throw 'Not enough signatures' exception", async () => {
     const amount = parseUnits("2");
     const data = prepareSwapData(
-      owner.address,
-      token.address,
-      amount,
-      tonAddressHash,
-      TON_TX_HASH,
-      TON_TX_LT
+        owner.address,
+        token.address,
+        amount,
+        tonAddressHash,
+        TON_TX_HASH,
+        TON_TX_LT
     );
 
     const signatures = signSwapData(data, [signer], bridge.address);
     try {
       await bridge.unlock(data, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Not enough signatures");
     }
@@ -335,6 +346,7 @@ describe("Bridge contract", () => {
     await bridge.unlock(data, signatures);
     try {
       await bridge.unlock(data, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Vote is already finished");
     }
@@ -385,17 +397,18 @@ describe("Bridge contract", () => {
     const signatures = signSwapData(data, oracleSet, bridge.address);
 
     try {
-    await bridge.unlock(prepareSwapData(
-        owner.address,
-        token.address,
-        parseUnits('5'),
-        tonAddressHash,
-        TON_TX_HASH,
-        TON_TX_LT
-    ), signatures);
-  } catch (err: any) {
-    expect(err.toString()).to.have.string("Wrong signature");
-  }
+      await bridge.unlock(prepareSwapData(
+          owner.address,
+          token.address,
+          parseUnits('5'),
+          tonAddressHash,
+          TON_TX_HASH,
+          TON_TX_LT
+      ), signatures);
+      expect.fail()
+    } catch (err: any) {
+      expect(err.toString()).to.have.string("Wrong signature");
+    }
   });
 
   it("Should unlock token 2 ** 100", async () => {
@@ -442,6 +455,7 @@ describe("Bridge contract", () => {
 
     try {
       await bridge.voteForSwitchLock(true, 666, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Vote is already finished");
     }
@@ -457,6 +471,7 @@ describe("Bridge contract", () => {
 
     try {
       await bridge.voteForSwitchLock(true, 666, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Unauthorized signer");
     }
@@ -466,12 +481,13 @@ describe("Bridge contract", () => {
     const signatures = signUpdateLockStatus(
         true,
         666,
-        oracleSet.slice(1),
+        oracleSet.slice(2),
         bridge.address
     );
 
     try {
       await bridge.voteForSwitchLock(true, 666, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Not enough signatures");
     }
@@ -487,6 +503,7 @@ describe("Bridge contract", () => {
 
     try {
       await bridge.voteForSwitchLock(true, 555, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Wrong signature");
     }
@@ -511,10 +528,10 @@ describe("Bridge contract", () => {
     ];
 
     const signatures = signUpdateOracleData(
-      oracleSetHash,
-      newOracleSet,
-      oracleSet,
-      bridge.address
+        oracleSetHash,
+        newOracleSet,
+        oracleSet,
+        bridge.address
     );
 
     await bridge.voteForNewOracleSet(oracleSetHash, newOracleSet, signatures);
@@ -525,6 +542,7 @@ describe("Bridge contract", () => {
 
     try {
       await bridge.voteForNewOracleSet(oracleSetHash, newOracleSet, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Vote is already finished");
     }
@@ -547,14 +565,15 @@ describe("Bridge contract", () => {
     ];
 
     const signatures = signUpdateOracleData(
-      oracleSetHash,
-      newOracleSet,
-      oracleSet,
-      bridge.address
+        oracleSetHash,
+        newOracleSet,
+        oracleSet,
+        bridge.address
     );
 
     try {
       await bridge.voteForNewOracleSet(oracleSetHash, oldOracles, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Wrong signature");
     }
@@ -577,14 +596,15 @@ describe("Bridge contract", () => {
     ];
 
     const signatures = signUpdateOracleData(
-      oracleSetHash,
-      newOracleSet,
-      oracleSet.slice(2).concat([unauthorized]),
-      bridge.address
+        oracleSetHash,
+        newOracleSet,
+        oracleSet.slice(2).concat([unauthorized]),
+        bridge.address
     );
 
     try {
-    await bridge.voteForNewOracleSet(oracleSetHash, newOracleSet, signatures);
+      await bridge.voteForNewOracleSet(oracleSetHash, newOracleSet, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Unauthorized signer");
     }
@@ -607,14 +627,15 @@ describe("Bridge contract", () => {
     ];
 
     const signatures = signUpdateOracleData(
-      oracleSetHash,
-      newOracleSet,
-      oracleSet.slice(1),
-      bridge.address
+        oracleSetHash,
+        newOracleSet,
+        oracleSet.slice(2),
+        bridge.address
     );
 
     try {
-    await bridge.voteForNewOracleSet(oracleSetHash, newOracleSet, signatures);
+      await bridge.voteForNewOracleSet(oracleSetHash, newOracleSet, signatures);
+      expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Not enough signatures");
     }
@@ -633,14 +654,15 @@ describe("Bridge contract", () => {
     ];
 
     const signatures = signUpdateOracleData(
-      oracleSetHash,
-      newOracleSet,
-      oracleSet,
-      bridge.address
+        oracleSetHash,
+        newOracleSet,
+        oracleSet,
+        bridge.address
     );
 
     try {
       await bridge.voteForNewOracleSet(oracleSetHash, newOracleSet, signatures);
+      expect.fail()
     } catch (error: any) {
       expect(error.toString()).to.have.string("New set is too short");
     }
@@ -662,14 +684,15 @@ describe("Bridge contract", () => {
     ];
 
     const signatures = signUpdateOracleData(
-      oracleSetHash,
-      newOracleSet,
-      oracleSet,
-      bridge.address
+        oracleSetHash,
+        newOracleSet,
+        oracleSet,
+        bridge.address
     );
 
     try {
       await bridge.voteForNewOracleSet(oracleSetHash, newOracleSet, signatures);
+      expect.fail()
     } catch (error: any) {
       expect(error.toString()).to.have.string("Duplicate oracle in Set");
     }
