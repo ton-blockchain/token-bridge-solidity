@@ -7,7 +7,7 @@ import "./SignatureChecker.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 interface IWrappedJetton {
-    function isWrappedJetton() external view returns (bool);
+    function isWrappedJetton() external pure returns (bool);
 }
 
 contract Bridge is SignatureChecker {
@@ -145,7 +145,7 @@ contract Bridge is SignatureChecker {
         return oracleSet;
     }
 
-    function checkTokenIsWrappedJetton(address token) public view returns (bool) {
+    function checkTokenIsWrappedJetton(address token) public pure returns (bool) {
         try IWrappedJetton(token).isWrappedJetton() returns (
             bool isWrappedJetton
         ) {

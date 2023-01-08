@@ -8,7 +8,7 @@ contract TestWrappedJetton is ERC20 {
         _mint(msg.sender, 2000000e18);
     }
 
-    function isWrappedJetton() external view returns (bool) {
+    function isWrappedJetton() external pure returns (bool) {
         return true;
     }
 }
