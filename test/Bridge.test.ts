@@ -81,7 +81,7 @@ describe("Bridge contract", () => {
 
     await expect(bridge.lock(token.address, bridgeAllowance, tonAddressHash))
         .to.emit(bridge, 'Lock')
-        .withArgs(owner.address, token.address, tonAddressHash.toLowerCase(), bridgeAllowance, 18);
+        .withArgs(owner.address, token.address, tonAddressHash.toLowerCase(), bridgeAllowance, bridgeAllowance, 18);
 
     const ownerBalanceNew = await token.balanceOf(owner.address);
     const bridgeBalance = await token.balanceOf(bridge.address);

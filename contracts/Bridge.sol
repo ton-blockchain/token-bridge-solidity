@@ -5,12 +5,13 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./SignatureChecker.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 interface IWrappedJetton {
     function isWrappedJetton() external pure returns (bool);
 }
 
-contract Bridge is SignatureChecker {
+contract Bridge is SignatureChecker, ReentrancyGuard {
     using SafeERC20 for IERC20;
     address[] oracleSet;
     mapping(address => bool) public isOracle;
@@ -22,6 +23,7 @@ contract Bridge is SignatureChecker {
         address indexed token,
         bytes32 indexed to_addr_hash,
         uint256 value,
+        uint256 new_bridge_balance,
         uint8 decimals
     );
     event Unlock(
@@ -63,7 +65,7 @@ contract Bridge is SignatureChecker {
         address token,
         uint256 amount,
         bytes32 to_address_hash
-    ) external {
+    ) external nonReentrant {
         require(allowLock, "Lock is currently disabled");
         require(token != address(0), "lock: wrong token address");
         require(token != address(0x582d872A1B094FC48F5DE31D3B73F2D9bE47def1), "lock wrapped toncoin");
@@ -88,6 +90,7 @@ contract Bridge is SignatureChecker {
             token,
             to_address_hash,
             newBalance - oldBalance,
+            newBalance,
             ERC20(token).decimals()
         );
     }
