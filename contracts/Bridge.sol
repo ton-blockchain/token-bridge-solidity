@@ -96,7 +96,7 @@ contract Bridge is SignatureChecker, ReentrancyGuard {
     }
 
     function unlock(SwapData calldata data, Signature[] calldata signatures)
-        external
+        external nonReentrant
     {
         bytes32 _id = getSwapDataId(data);
         _generalVote(_id, signatures);
