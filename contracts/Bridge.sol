@@ -138,6 +138,7 @@ contract Bridge is SignatureChecker, ReentrancyGuard {
         oracleSet = newOracles;
         uint256 newSetLen = oracleSet.length;
         for (uint256 i = 0; i < newSetLen; i++) {
+            require(newOracles[i] != address(0), "zero signer");
             require(!isOracle[newOracles[i]], "Duplicate oracle in Set");
             isOracle[newOracles[i]] = true;
         }

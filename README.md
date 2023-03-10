@@ -12,6 +12,9 @@ npm run test
 
 ## Deploy
 
+> ⚠️ NOTE: It is preferable that the number of oracles will be divisible by 3.
+> Note that in other cases minimum consensus is `floor((2 * oracleSet.length + 2) / 3)`. For example, 4 oracles required 3 signatures. It's different from the Toncoin bridge.
+
 change `PRIVATE_KEY`, `GOERLI_ENDPOINT`, `BSC_TESTNET_ENDPOINT` in `.env`.
 
 Ethereum Goerli Testnet:
