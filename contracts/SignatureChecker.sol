@@ -5,6 +5,7 @@ import "./TonUtils.sol";
 
 contract SignatureChecker is TonUtils {
     function checkSignature(bytes32 digest, Signature memory sig) public pure {
+        require(sig.signer != address(0), "ECDSA: zero signer"); // The `ecrecover` function returns zero on failure, so if sig.signer == 0 then any signature will be accepted regardless of whether it is cryptographically valid.
         require(sig.signature.length == 65, "ECDSA: invalid signature length");
         // Divide the signature in r, s and v variables
         bytes32 r;
