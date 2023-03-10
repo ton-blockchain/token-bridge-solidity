@@ -123,7 +123,7 @@ describe("Bridge contract", () => {
       );
       expect.fail()
     } catch (err: any) {
-      expect(err.toString()).to.have.string("lock: wrong token address");
+      expect(err.toString()).to.have.string("lock: disabled token");
     }
   });
 
@@ -138,7 +138,7 @@ describe("Bridge contract", () => {
       );
       expect.fail()
     } catch (err: any) {
-      expect(err.toString()).to.have.string("lock wrapped toncoin");
+      expect(err.toString()).to.have.string("lock: disabled token");
     }
   });
 
@@ -153,7 +153,7 @@ describe("Bridge contract", () => {
       );
       expect.fail()
     } catch (err: any) {
-      expect(err.toString()).to.have.string("lock wrapped toncoin");
+      expect(err.toString()).to.have.string("lock: disabled token");
     }
   });
 

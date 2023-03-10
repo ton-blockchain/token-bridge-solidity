@@ -15,6 +15,7 @@ contract Bridge is SignatureChecker, ReentrancyGuard {
     using SafeERC20 for IERC20;
     address[] oracleSet;
     mapping(address => bool) public isOracle;
+    mapping(address => bool) public disabledTokens;
     mapping(bytes32 => bool) public finishedVotings;
     bool public allowLock;
 
@@ -38,6 +39,9 @@ contract Bridge is SignatureChecker, ReentrancyGuard {
 
     constructor(address[] memory initialSet) {
         _updateOracleSet(0, initialSet);
+        disabledTokens[address(0)] = true;
+        disabledTokens[address(0x582d872A1B094FC48F5DE31D3B73F2D9bE47def1)] = true; // wrapped toncoin
+        disabledTokens[address(0x76A797A59Ba2C17726896976B7B3747BfD1d220f)] = true; // wrapped toncoin
     }
 
     function _generalVote(bytes32 digest, Signature[] memory signatures)
@@ -67,9 +71,7 @@ contract Bridge is SignatureChecker, ReentrancyGuard {
         bytes32 to_address_hash
     ) external nonReentrant {
         require(allowLock, "Lock is currently disabled");
-        require(token != address(0), "lock: wrong token address");
-        require(token != address(0x582d872A1B094FC48F5DE31D3B73F2D9bE47def1), "lock wrapped toncoin");
-        require(token != address(0x76A797A59Ba2C17726896976B7B3747BfD1d220f), "lock wrapped toncoin");
+        require(!disabledTokens[token], "lock: disabled token");
         require(!checkTokenIsWrappedJetton(token), "lock wrapped jetton");
 
         uint256 totalSupply = IERC20(token).totalSupply();
@@ -125,6 +127,22 @@ contract Bridge is SignatureChecker, ReentrancyGuard {
         _generalVote(_id, signatures);
         finishedVotings[_id] = true;
         allowLock = newLockStatus;
+    }
+
+    function voteForDisableToken(
+        bool isDisable,
+        address tokenAddress,
+        uint256 nonce,
+        Signature[] calldata signatures
+    ) external {
+        bytes32 _id = getNewDisableToken(isDisable, tokenAddress, nonce);
+        _generalVote(_id, signatures);
+        finishedVotings[_id] = true;
+        if (isDisable) {
+            disabledTokens[tokenAddress] = true;
+        } else {
+            delete disabledTokens[tokenAddress];
+        }
     }
 
     function _updateOracleSet(uint256 oracleSetHash, address[] memory newOracles)

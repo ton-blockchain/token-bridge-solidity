@@ -77,4 +77,14 @@ contract SignatureChecker is TonUtils {
             abi.encode(0xB012, address(this), block.chainid, newLockStatus, nonce)
         );
     }
+
+    function getNewDisableToken(bool isDisable, address tokenAddress,  uint256 nonce)
+        public
+        view
+        returns (bytes32 result)
+    {
+        result = keccak256(
+            abi.encode(0xD15A, address(this), block.chainid, isDisable, tokenAddress, nonce)
+        );
+    }
 }
