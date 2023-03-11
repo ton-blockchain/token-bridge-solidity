@@ -64,6 +64,18 @@ export let signUpdateLockStatus = (newLockStatus: boolean, nonce: number, accoun
   return signatures;
 };
 
+export let signDisableToken = (isDisable: boolean, tokenAddress: string, nonce: number, accounts: Account[], target: any) => {
+  let signatures: Signature[] = new Array();
+  for (const account in accounts) {
+    if (Object.prototype.hasOwnProperty.call(accounts, account)) {
+      const element = accounts[account];
+      signatures.push(signHash(hashData(encodeNewDisableToken(isDisable, tokenAddress, nonce, target)), element));
+    }
+  }
+  signatures.sort(compareSignatures);
+  return signatures;
+};
+
 export let signUpdateOracleData = (
   oracleSetHash: string,
   newOracleSet: string[],
@@ -103,6 +115,18 @@ export let encodeNewLockStatus = (
   return ethers.utils.defaultAbiCoder.encode(
     ["int", "address", "uint256", "bool", "uint256"],
     [0xB012, target, CHAIN_ID, newLockStatus, nonce]
+  );
+};
+
+export let encodeNewDisableToken = (
+    isDisable: boolean,
+    tokenAddress: string,
+    nonce: number,
+    target: any
+) => {
+  return ethers.utils.defaultAbiCoder.encode(
+      ["int", "address", "uint256", "bool", "address", "uint256"],
+      [0xD15A, target, CHAIN_ID, isDisable, tokenAddress, nonce]
   );
 };
 

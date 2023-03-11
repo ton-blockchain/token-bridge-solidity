@@ -12,11 +12,11 @@ import {
 } from "./utils/constants";
 import {
   encodeOracleSet,
-  prepareSwapData,
+  prepareSwapData, signDisableToken,
   signSwapData, signUpdateLockStatus,
   signUpdateOracleData,
 } from "./utils/utils";
-import type { Bridge, TestToken, TestWrappedJetton } from "../typechain-types";
+import type { Bridge, TestToken, TestWrappedJetton, TestTokenWithoutMetadata } from "../typechain-types";
 import {BigNumber} from "ethers";
 
 const web3 = new Web3();
@@ -25,6 +25,7 @@ describe("Bridge contract", () => {
   let owner: SignerWithAddress;
   let bridge: Bridge;
   let token: TestToken;
+  let tokenWithoutMetadata: TestTokenWithoutMetadata;
   let wrappedJetton: TestWrappedJetton;
 
   const signer: Account = web3.eth.accounts.create() as unknown as Account;
@@ -59,6 +60,10 @@ describe("Bridge contract", () => {
     wrappedJetton = await TestWrappedJetton.deploy() as TestWrappedJetton;
     await wrappedJetton.deployed();
 
+    const TestTokenWithoutMetadata = await ethers.getContractFactory("TestTokenWithoutMetadata");
+    tokenWithoutMetadata = await TestTokenWithoutMetadata.deploy("name", "symbol", BigNumber.from('2000000').mul(BigNumber.from(10).pow(BigNumber.from(18)))) as TestTokenWithoutMetadata;
+    await tokenWithoutMetadata.deployed();
+
     const ownerBalance = await token.balanceOf(owner.address);
     expect(formatUnits(ownerBalance)).to.equal("2000000.0");
 
@@ -85,6 +90,21 @@ describe("Bridge contract", () => {
 
     const ownerBalanceNew = await token.balanceOf(owner.address);
     const bridgeBalance = await token.balanceOf(bridge.address);
+
+    expect(formatUnits(ownerBalanceNew)).to.equal("1999995.0");
+    expect(formatUnits(bridgeBalance)).to.equal("5.0");
+  });
+
+  it("Should lock token without metadata", async () => {
+    const bridgeAllowance = parseUnits("5");
+    await tokenWithoutMetadata.approve(bridge.address, bridgeAllowance);
+
+    await expect(bridge.lock(tokenWithoutMetadata.address, bridgeAllowance, tonAddressHash))
+        .to.emit(bridge, 'Lock')
+        .withArgs(owner.address, tokenWithoutMetadata.address, tonAddressHash.toLowerCase(), bridgeAllowance, bridgeAllowance, 0);
+
+    const ownerBalanceNew = await tokenWithoutMetadata.balanceOf(owner.address);
+    const bridgeBalance = await tokenWithoutMetadata.balanceOf(bridge.address);
 
     expect(formatUnits(ownerBalanceNew)).to.equal("1999995.0");
     expect(formatUnits(bridgeBalance)).to.equal("5.0");
@@ -579,6 +599,48 @@ describe("Bridge contract", () => {
     }
   });
 
+  it("update oracle set - zero oracle address", async () => {
+    const newSigner = web3.eth.accounts.create();
+    const newUser = web3.eth.accounts.create();
+    const newSigner1 = web3.eth.accounts.create();
+
+    const oldOracles = await bridge.getFullOracleSet();
+    expect(oldOracles).to.eql(oracleSetAddresses);
+
+    const oracleSetHash = keccak256(encodeOracleSet(oracleSetAddresses));
+
+    const newOracleSet = [
+      newSigner.address,
+      "0x0000000000000000000000000000000000000000",
+      newSigner1.address,
+    ];
+
+    const signatures = signUpdateOracleData(
+        oracleSetHash,
+        newOracleSet,
+        oracleSet,
+        bridge.address
+    );
+
+    try {
+      await bridge.voteForNewOracleSet(oracleSetHash, newOracleSet, signatures);
+      expect.fail()
+    } catch (err: any) {
+      expect(err.toString()).to.have.string("zero signer");
+    }
+  });
+
+  it("cant create with zero oracle", async ()=>{
+    try {
+      const Bridge = await ethers.getContractFactory("Bridge");
+      const b = await Bridge.deploy(oracleSetAddresses.concat("0x0000000000000000000000000000000000000000")) as Bridge;
+      await bridge.deployed();
+      expect.fail()
+    } catch (err: any) {
+      expect(err.toString()).to.have.string("zero signer");
+    }
+  })
+
   it("Unauthorized update oracle set", async () => {
     const newSigner = web3.eth.accounts.create();
     const newUser = web3.eth.accounts.create();
@@ -696,6 +758,59 @@ describe("Bridge contract", () => {
     } catch (error: any) {
       expect(error.toString()).to.have.string("Duplicate oracle in Set");
     }
+
+  });
+
+  // vote for disable token
+
+  it("Should disable and enable token", async () => {
+    const newSigner = web3.eth.accounts.create();
+    const newUser = web3.eth.accounts.create();
+    const newSigner1 = web3.eth.accounts.create();
+
+    const oldIsDisable = await bridge.disabledTokens(tokenWithoutMetadata.address);
+
+    expect(oldIsDisable).to.eql(false);
+
+    const signatures = signDisableToken(
+        true,
+        tokenWithoutMetadata.address,
+        1,
+        oracleSet,
+        bridge.address
+    );
+
+    await bridge.voteForDisableToken(true, tokenWithoutMetadata.address, 1, signatures);
+
+    const isDisable = await bridge.disabledTokens(tokenWithoutMetadata.address);
+
+    expect(isDisable).to.eql(true);
+
+    const bridgeAllowance = parseUnits("5");
+    await tokenWithoutMetadata.approve(bridge.address, bridgeAllowance);
+
+    try {
+      await bridge.lock(tokenWithoutMetadata.address, bridgeAllowance, tonAddressHash);
+      expect.fail()
+    } catch (err: any) {
+      expect(err.toString()).to.have.string("disabled token");
+    }
+
+    const signatures2 = signDisableToken(
+        false,
+        tokenWithoutMetadata.address,
+        2,
+        oracleSet,
+        bridge.address
+    );
+
+    await bridge.voteForDisableToken(false, tokenWithoutMetadata.address, 2, signatures2);
+
+    const isDisable2 = await bridge.disabledTokens(tokenWithoutMetadata.address);
+
+    expect(isDisable2).to.eql(false);
+
+    await bridge.lock(tokenWithoutMetadata.address, bridgeAllowance, tonAddressHash);
 
   });
 
