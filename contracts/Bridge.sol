@@ -4,11 +4,14 @@ pragma solidity ^0.8.9;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "./SignatureChecker.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 interface IWrappedJetton {
     function isWrappedJetton() external pure returns (bool);
+}
+
+interface IDecimals {
+    function decimals() external view returns (uint8);
 }
 
 contract Bridge is SignatureChecker, ReentrancyGuard {
@@ -93,7 +96,7 @@ contract Bridge is SignatureChecker, ReentrancyGuard {
             to_address_hash,
             newBalance - oldBalance,
             newBalance,
-            ERC20(token).decimals()
+            getDecimals(token)
         );
     }
 
@@ -174,6 +177,16 @@ contract Bridge is SignatureChecker, ReentrancyGuard {
             return isWrappedJetton;
         } catch {
             return false;
+        }
+    }
+
+    function getDecimals(address token) public view returns (uint8) {
+        try IDecimals(token).decimals() returns (
+            uint8 decimals
+        ) {
+            return decimals;
+        } catch {
+            return 0;
         }
     }
 }
