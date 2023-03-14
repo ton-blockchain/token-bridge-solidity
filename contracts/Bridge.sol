@@ -36,7 +36,8 @@ contract Bridge is SignatureChecker, ReentrancyGuard {
         bytes32 indexed ton_tx_hash,
         uint64 lt,
         address indexed to,
-        uint256 value
+        uint256 value,
+        uint256 new_bridge_balance
     );
     event NewOracleSet(uint256 oracleSetHash, address[] newOracles);
 
@@ -77,11 +78,6 @@ contract Bridge is SignatureChecker, ReentrancyGuard {
         require(!disabledTokens[token], "lock: disabled token");
         require(!checkTokenIsWrappedJetton(token), "lock wrapped jetton");
 
-        uint256 totalSupply = IERC20(token).totalSupply();
-        require(totalSupply <= 2 ** 120 - 1, "Max totalSupply 2 ** 120 - 1");
-
-        require(amount <= 2 ** 100, "Max amount 2 ** 100");
-
         uint256 oldBalance = IERC20(token).balanceOf(address(this));
 
         IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
@@ -89,6 +85,8 @@ contract Bridge is SignatureChecker, ReentrancyGuard {
         uint256 newBalance = IERC20(token).balanceOf(address(this));
 
         require(newBalance > oldBalance, "newBalance must be greater than oldBalance");
+
+        require(newBalance <= 2 ** 120 - 1, "Max jetton totalSupply 2 ** 120 - 1");
 
         emit Lock(
             msg.sender,
@@ -107,7 +105,8 @@ contract Bridge is SignatureChecker, ReentrancyGuard {
         _generalVote(_id, signatures);
         finishedVotings[_id] = true;
         IERC20(data.token).safeTransfer(data.receiver, data.amount);
-        emit Unlock(data.token, data.tx.address_hash, data.tx.tx_hash, data.tx.lt, data.receiver, data.amount);
+        uint256 newBalance = IERC20(data.token).balanceOf(address(this));
+        emit Unlock(data.token, data.tx.address_hash, data.tx.tx_hash, data.tx.lt, data.receiver, data.amount, newBalance);
     }
 
     function voteForNewOracleSet(

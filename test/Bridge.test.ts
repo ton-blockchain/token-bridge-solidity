@@ -194,7 +194,7 @@ describe("Bridge contract", () => {
     const tokenBigSupply = await TestToken.deploy(BigNumber.from(2).pow(BigNumber.from(255))) as TestToken;
     await tokenBigSupply.deployed();
 
-    const bridgeAllowance = parseUnits("5");
+    const bridgeAllowance = BigNumber.from(2).pow(BigNumber.from(255));
     await tokenBigSupply.approve(bridge.address, bridgeAllowance);
     try {
       await bridge.lock(
@@ -204,26 +204,7 @@ describe("Bridge contract", () => {
       );
       expect.fail()
     } catch (err: any) {
-      expect(err.toString()).to.have.string("Max totalSupply 2 ** 120 - 1");
-    }
-  });
-
-  it("Cant lock big supply 2**120", async () => {
-    const TestToken = await ethers.getContractFactory("TestToken");
-    const tokenBigSupply = await TestToken.deploy(BigNumber.from(2).pow(BigNumber.from(120))) as TestToken;
-    await tokenBigSupply.deployed();
-
-    const bridgeAllowance = parseUnits("5");
-    await tokenBigSupply.approve(bridge.address, bridgeAllowance);
-    try {
-      await bridge.lock(
-          tokenBigSupply.address,
-          bridgeAllowance,
-          tonAddressHash
-      );
-      expect.fail()
-    } catch (err: any) {
-      expect(err.toString()).to.have.string("Max totalSupply 2 ** 120 - 1");
+      expect(err.toString()).to.have.string("Max jetton totalSupply 2 ** 120 - 1");
     }
   });
 
@@ -232,7 +213,7 @@ describe("Bridge contract", () => {
     const tokenBigSupply = await TestToken.deploy(BigNumber.from(2).pow(BigNumber.from(120)).sub(1)) as TestToken;
     await tokenBigSupply.deployed();
 
-    const bridgeAllowance = parseUnits("5");
+    const bridgeAllowance = BigNumber.from(2).pow(BigNumber.from(120)).sub(1);
     await tokenBigSupply.approve(bridge.address, bridgeAllowance);
     const ownerBalanceOld = await tokenBigSupply.balanceOf(owner.address);
 
@@ -242,27 +223,7 @@ describe("Bridge contract", () => {
     const bridgeBalance = await tokenBigSupply.balanceOf(bridge.address);
 
     expect(await tokenBigSupply.balanceOf(owner.address)).to.equal(ownerBalanceNew);
-    expect(formatUnits(bridgeBalance)).to.equal("5.0");
-  });
-
-  it("Cant lock big amount 2**100 + 1", async () => {
-    const TestToken = await ethers.getContractFactory("TestToken");
-    const totalSupply = BigNumber.from(2).pow(BigNumber.from(100)).add(1);
-    const tokenBigSupply = await TestToken.deploy(totalSupply) as TestToken;
-    await tokenBigSupply.deployed();
-
-    const bridgeAllowance = totalSupply;
-    await tokenBigSupply.approve(bridge.address, bridgeAllowance);
-    try {
-      await bridge.lock(
-          tokenBigSupply.address,
-          totalSupply,
-          tonAddressHash
-      );
-      expect.fail()
-    } catch (err: any) {
-      expect(err.toString()).to.have.string("Max amount 2 ** 100");
-    }
+    expect(bridgeBalance).to.equal(BigNumber.from(2).pow(BigNumber.from(120)).sub(1).toString());
   });
 
   it("lock big amount 2**100", async () => {
@@ -391,7 +352,7 @@ describe("Bridge contract", () => {
 
     await expect(bridge.unlock(data, signatures))
         .to.emit(bridge, 'Unlock')
-        .withArgs(token.address, tonAddressHash.toLowerCase(), TON_TX_HASH.toLowerCase(), TON_TX_LT, owner.address, amount);
+        .withArgs(token.address, tonAddressHash.toLowerCase(), TON_TX_HASH.toLowerCase(), TON_TX_LT, owner.address, amount, parseUnits("3"));
 
     const ownerBalanceUnlocked = await token.balanceOf(owner.address);
     const bridgeBalanceUnlocked = await token.balanceOf(bridge.address);
