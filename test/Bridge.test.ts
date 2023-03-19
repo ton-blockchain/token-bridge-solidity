@@ -208,6 +208,25 @@ describe("Bridge contract", () => {
     }
   });
 
+  it("Cant lock 2 ** 120", async () => {
+    const TestToken = await ethers.getContractFactory("TestToken");
+    const tokenBigSupply = await TestToken.deploy(BigNumber.from(2).pow(BigNumber.from(255))) as TestToken;
+    await tokenBigSupply.deployed();
+
+    const bridgeAllowance = BigNumber.from(2).pow(BigNumber.from(120));
+    await tokenBigSupply.approve(bridge.address, bridgeAllowance);
+    try {
+      await bridge.lock(
+          tokenBigSupply.address,
+          bridgeAllowance,
+          tonAddressHash
+      );
+      expect.fail()
+    } catch (err: any) {
+      expect(err.toString()).to.have.string("Max jetton totalSupply 2 ** 120 - 1");
+    }
+  });
+
   it("lock big supply 2**120 - 1", async () => {
     const TestToken = await ethers.getContractFactory("TestToken");
     const tokenBigSupply = await TestToken.deploy(BigNumber.from(2).pow(BigNumber.from(120)).sub(1)) as TestToken;
@@ -284,6 +303,53 @@ describe("Bridge contract", () => {
       expect.fail()
     } catch (err: any) {
       expect(err.toString()).to.have.string("Unauthorized signer");
+    }
+  });
+
+  it("Signatures are not sorted", async () => {
+    const amount = parseUnits("2").toString();
+    const data = prepareSwapData(
+        owner.address,
+        token.address,
+        amount,
+        tonAddressHash,
+        TON_TX_HASH,
+        TON_TX_LT
+    );
+
+    const signatures = signSwapData(data, oracleSet, bridge.address).reverse();
+
+    try {
+      await bridge.unlock(data, signatures);
+      expect.fail()
+    } catch (err: any) {
+      expect(err.toString()).to.have.string("Signatures are not sorted");
+    }
+  });
+
+  it("Signatures duplicated", async () => {
+    const amount = parseUnits("2").toString();
+    const data = prepareSwapData(
+        owner.address,
+        token.address,
+        amount,
+        tonAddressHash,
+        TON_TX_HASH,
+        TON_TX_LT
+    );
+
+    const signatures = signSwapData(data,  [
+      signer,
+      signer,
+      signer1,
+      signer2,
+    ], bridge.address).reverse();
+
+    try {
+      await bridge.unlock(data, signatures);
+      expect.fail()
+    } catch (err: any) {
+      expect(err.toString()).to.have.string("Signatures are not sorted");
     }
   });
 
@@ -474,7 +540,7 @@ describe("Bridge contract", () => {
     }
   })
 
-  it("voteForSwitchLock invalid singature", async () => {
+  it("voteForSwitchLock invalid signature", async () => {
     const signatures = signUpdateLockStatus(
         true,
         666,
@@ -774,5 +840,75 @@ describe("Bridge contract", () => {
     await bridge.lock(tokenWithoutMetadata.address, bridgeAllowance, tonAddressHash);
 
   });
+
+  it("voteForDisableToken Vote is already finished", async () => {
+    const signatures = signDisableToken(
+        true,
+        tokenWithoutMetadata.address,
+        1,
+        oracleSet,
+        bridge.address
+    );
+
+    await bridge.voteForDisableToken(true, tokenWithoutMetadata.address, 1, signatures);
+
+    try {
+      await bridge.voteForDisableToken(true, tokenWithoutMetadata.address, 1, signatures);
+      expect.fail()
+    } catch (err: any) {
+      expect(err.toString()).to.have.string("Vote is already finished");
+    }
+  })
+
+  it("voteForDisableToken Unauthorized signer", async () => {
+    const signatures = signDisableToken(
+        true,
+        tokenWithoutMetadata.address,
+        1,
+        oracleSet.slice(2).concat([unauthorized]),
+        bridge.address
+    );
+
+    try {
+      await bridge.voteForDisableToken(true, tokenWithoutMetadata.address, 1, signatures);
+      expect.fail()
+    } catch (err: any) {
+      expect(err.toString()).to.have.string("Unauthorized signer");
+    }
+  })
+
+  it("voteForDisableToken Not enough signatures", async () => {
+    const signatures = signDisableToken(
+        true,
+        tokenWithoutMetadata.address,
+        1,
+        oracleSet.slice(2),
+        bridge.address
+    );
+
+    try {
+      await bridge.voteForDisableToken(true, tokenWithoutMetadata.address, 1, signatures);
+      expect.fail()
+    } catch (err: any) {
+      expect(err.toString()).to.have.string("Not enough signatures");
+    }
+  })
+
+  it("voteForDisableToken invalid signature", async () => {
+    const signatures = signDisableToken(
+        true,
+        tokenWithoutMetadata.address,
+        1,
+        oracleSet,
+        bridge.address
+    );
+
+    try {
+      await bridge.voteForDisableToken(true, tokenWithoutMetadata.address, 2, signatures);
+      expect.fail()
+    } catch (err: any) {
+      expect(err.toString()).to.have.string("Wrong signature");
+    }
+  })
 
 });
