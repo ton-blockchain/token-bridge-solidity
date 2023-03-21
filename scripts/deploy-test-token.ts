@@ -6,10 +6,10 @@ async function main() {
   const [owner] = await ethers.getSigners();
 
   const TestToken = await ethers.getContractFactory("TestToken");
-  const token = await TestToken.deploy();
+  const token = await TestToken.deploy("1000000000000000000000000000000");
   await token.deployed();
 
-  console.log("token deployed to ", token.address); //0xc16729819F509eEe797181D7Ab158881c1538999
+  console.log("token deployed to ", token.address);
 }
 
 main().catch((error) => {
