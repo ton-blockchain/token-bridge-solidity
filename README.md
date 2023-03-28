@@ -62,3 +62,33 @@ Based on [Toncoin Bridge](https://github.com/ton-blockchain/bridge-solidity/tree
         `voteForSwitchBurn` renamed to `voteForSwitchLock`
        
         cosmetic changes and optimizations
+
+# Etherscan code verification
+
+Add to the end of `hardhat.config.ts` you api key of etherscan or bscscan
+
+```
+  etherscan: {
+    apiKey: "123ABC",
+  },
+```
+
+Use `etherscan` field for bscscan too.
+
+Make `arguments.js` file with init oracle addresses array:
+
+```js
+module.exports = [
+    [
+        '0xeb05E1B6AC0d574eF2CF29FDf01cC0bA3D8F9Bf1',
+        '0xe54CD631C97bE0767172AD16904688962d09d2FE',
+        '0xF636f40Ebe17Fb2A1343e5EEee9D13AA90888b51'
+    ]
+];
+```
+
+Run command
+
+```basb
+npx hardhat verify --network bsc_testnet --constructor-args arguments.js 0xADDRESS_OF_BRIDGE_CONTRACT
+```
