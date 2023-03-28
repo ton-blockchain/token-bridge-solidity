@@ -9,6 +9,7 @@
     "deploy-test-token-bsc-testnet": "npx hardhat run ./scripts/deploy-test-token.ts --network bsc_testnet",
     "deploy-bridge-goerli": "npx hardhat run ./scripts/deploy-bridge.ts --network goerli",
     "deploy-bridge-bsc-testnet": "npx hardhat run ./scripts/deploy-bridge.ts --network bsc_testnet",
+    "deploy-bridge-ethereum": "npx hardhat run ./scripts/deploy-mainnet-bridge.ts --network ethereum",
     "triple-lock": "npx hardhat run ./scripts/call-lock.ts --network bsc_testnet && npx hardhat run ./scripts/call-lock.ts --network bsc_testnet && npx hardhat run ./scripts/call-lock.ts --network bsc_testnet",
     "lock-bnb": "npx hardhat run ./scripts/call-lock.ts --network bsc_testnet",
     "unlock": "npx hardhat run ./scripts/call-unlock.ts --network bsc_testnet"

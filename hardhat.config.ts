@@ -38,6 +38,11 @@ const config: HardhatUserConfig = {
         count: 100,
       },
     },
+    ethereum: {
+      url: process.env.ETH_ENDPOINT || "",
+      accounts:
+        [process.env.PRIVATE_KEY || ''],
+    },
     goerli: {
       url: process.env.GOERLI_ENDPOINT || "",
       accounts:
@@ -51,6 +56,9 @@ const config: HardhatUserConfig = {
       url: "http://127.0.0.1:8545/",
       chainId: 31337,
     },
+  },
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY,
   },
 };
 
